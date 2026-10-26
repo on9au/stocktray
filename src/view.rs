@@ -52,7 +52,8 @@ pub struct View {
 }
 
 impl View {
-    pub fn new(symbol: &Symbol, feed: &Feed, config_error: Option<&str>, now: OffsetDateTime) -> Self {
+    /// `notes` are extra tooltip lines, such as a settings error or an available update.
+    pub fn new(symbol: &Symbol, feed: &Feed, notes: &[String], now: OffsetDateTime) -> Self {
         let (lines, trend, status) = match feed {
             Feed::Loading => (vec!["…".to_owned()], Trend::Unknown, Some("Loading…".to_owned())),
             Feed::Live(quote) => (icon_lines(quote.price), trend(quote.change()), None),
@@ -65,7 +66,7 @@ impl View {
         let quote = feed.quote();
         let mut tooltip = quote.map_or_else(|| vec![symbol.to_string()], |q| quote_lines(symbol, q, now));
         tooltip.extend(status);
-        tooltip.extend(config_error.map(|e| format!("⚠ Settings ignored: {e}")));
+        tooltip.extend_from_slice(notes);
         Self {
             lines,
             trend,
@@ -165,7 +166,7 @@ mod tests {
     }
 
     fn view(feed: &Feed, now: OffsetDateTime) -> View {
-        View::new(&"WTC.AX".parse().unwrap(), feed, None, now)
+        View::new(&"WTC.AX".parse().unwrap(), feed, &[], now)
     }
 
     #[test]

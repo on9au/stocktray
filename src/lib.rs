@@ -5,4 +5,5 @@ pub mod config;
 pub mod icon;
 pub mod poller;
 pub mod quote;
+pub mod update;
 pub mod view;

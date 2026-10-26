@@ -60,6 +60,15 @@ pub fn message_box(text: &str) {
     }
 }
 
+/// Starts an installer built by `package.ps1` without its wizard. It replaces this exe (which must
+/// exit straight after) and starts the new one.
+pub fn run_installer(path: &Path) -> io::Result<()> {
+    std::process::Command::new(path)
+        .args(["/SILENT", "/SUPPRESSMSGBOXES", "/NORESTART", "/CLOSEAPPLICATIONS"])
+        .spawn()
+        .map(drop)
+}
+
 fn run_command() -> io::Result<String> {
     Ok(format!("\"{}\"", std::env::current_exe()?.display()))
 }

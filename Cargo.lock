@@ -1652,6 +1652,7 @@ dependencies = [
  "ab_glyph",
  "anyhow",
  "png",
+ "semver",
  "serde",
  "serde_json",
  "tao",

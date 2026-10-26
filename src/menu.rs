@@ -10,6 +10,8 @@ pub enum Action {
     EditSettings,
     /// The tick's new state; the menu toggles it before reporting the click.
     SetAutostart(bool),
+    /// Check for, or install, an update, depending on what the item currently offers.
+    Update,
     Exit,
 }
 
@@ -18,6 +20,8 @@ pub struct TrayMenu {
     /// The disabled first item, naming the stock.
     pub header: MenuItem,
     pub autostart: CheckMenuItem,
+    /// Its text follows [`stocktray::update::State`].
+    pub update: MenuItem,
     actions: Vec<(MenuId, Action)>,
 }
 
@@ -28,6 +32,7 @@ impl TrayMenu {
             (item("Refresh now"), item("Open quote page"), item("Edit settings…"), item("Exit"));
         let header = MenuItem::new("", false, None);
         let autostart = CheckMenuItem::new("Start with Windows", true, autostart, None);
+        let update = MenuItem::new("", false, None);
         let separator = PredefinedMenuItem::separator;
         let menu = Menu::with_items(&[
             &header,
@@ -37,18 +42,20 @@ impl TrayMenu {
             &edit,
             &separator(),
             &autostart,
+            &update,
             &separator(),
             &exit,
         ])?;
         let actions = [
-            (refresh, Action::Refresh),
-            (open, Action::OpenQuotePage),
-            (edit, Action::EditSettings),
-            (exit, Action::Exit),
+            (&refresh, Action::Refresh),
+            (&open, Action::OpenQuotePage),
+            (&edit, Action::EditSettings),
+            (&update, Action::Update),
+            (&exit, Action::Exit),
         ]
         .map(|(item, action)| (item.id().clone(), action))
         .into();
-        Ok(Self { menu, header, autostart, actions })
+        Ok(Self { menu, header, autostart, update, actions })
     }
 
     pub fn action(&self, id: &MenuId) -> Option<Action> {

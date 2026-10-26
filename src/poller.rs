@@ -19,7 +19,7 @@ pub enum Command {
     SetConfig(Config),
 }
 
-pub struct Update {
+pub struct Fetched {
     /// The symbol fetched, so a result that lands after a symbol change can be dropped.
     pub symbol: Symbol,
     pub result: Result<Quote, String>,
@@ -30,7 +30,7 @@ pub struct Update {
 pub fn spawn(
     source: impl QuoteSource + 'static,
     mut config: Config,
-    notify: impl Fn(Update) -> bool + Send + 'static,
+    notify: impl Fn(Fetched) -> bool + Send + 'static,
 ) -> Sender<Command> {
     let (tx, rx) = mpsc::channel();
     thread::spawn(move || {
@@ -45,7 +45,7 @@ pub fn spawn(
                 }
                 Err(_) => config.poll_open,
             };
-            if !notify(Update { symbol: config.symbol.clone(), result: result.map_err(|e| format!("{e:#}")) }) {
+            if !notify(Fetched { symbol: config.symbol.clone(), result: result.map_err(|e| format!("{e:#}")) }) {
                 return;
             }
             let first = match rx.recv_timeout(delay) {
