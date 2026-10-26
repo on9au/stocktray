@@ -1,6 +1,6 @@
 [package]
 name = "stocktray"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "Windows tray icon showing a live stock price"
 authors = ["on9au <151502370+on9au@users.noreply.github.com>"]
