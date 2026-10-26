@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/on9au/stocktray/compare/v0.1.0...v0.1.1) (2026-10-26)
+
+
+### Bug Fixes
+
+* attach the installer to releases ([d4697f0](https://github.com/on9au/stocktray/commit/d4697f08796cf0924b0fffbbeadc99662b8bc615))
+
 ## 0.1.0 (2026-10-26)
 
 
