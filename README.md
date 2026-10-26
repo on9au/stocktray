@@ -12,18 +12,28 @@ WTC.AX  40.57 AUD
 as of 3:57 pm AEDT
 ```
 
-Right-click for Refresh now, Open quote page, Edit settings…, Start with Windows and Exit.
-Double-click to open the quote page.
+Right-click for Refresh now, Open quote page, Edit settings…, Start with Windows, updates and
+Exit. Double-click to open the quote page.
 
-## Build
+## Install
 
-```
-cargo build --release
-```
+Download `stocktray-<version>-setup.exe` from the
+[latest release](https://github.com/on9au/stocktray/releases/latest) and run it. It installs
+for your account only, to `%LOCALAPPDATA%\Programs\stocktray`, with no admin prompt. The
+installer isn't code-signed, so SmartScreen may warn about an unrecognised app: choose
+**More info → Run anyway**.
 
-This gives a single `target\release\stocktray.exe` (about 2 MB) with no runtime to install.
-Run it, then pin it: Windows 11 hides new tray icons behind `^`. To keep it visible, go to
+Windows 11 hides new tray icons behind `^`. To keep it visible, go to
 **Settings → Personalization → Taskbar → Other system tray icons** and turn on stocktray.
+
+Uninstall from **Settings → Apps → Installed apps**. Your settings file is kept.
+
+## Updates
+
+stocktray checks GitHub for a newer release at startup, every 12 hours, and when you click the
+update item in its menu. When there is one, the tooltip says so and the menu offers
+**Install update vX.Y.Z**. Clicking it downloads the installer, which replaces the app and
+restarts it, keeping your Start with Windows choice.
 
 ## Settings
 
@@ -60,15 +70,27 @@ $10,000 there's no room for cents, so 12,345.67 shows as `12k`.
 cargo test                            # unit tests
 cargo test -- --include-ignored       # also hit the live APIs
 cargo run --example preview -- p.png  # render every icon variant, magnified
+cargo run --example make_icon         # regenerate assets/stocktray.ico
+.\package.ps1                         # build dist\stocktray-<version>-setup.exe
 ```
+
+`package.ps1` needs [Inno Setup](https://jrsoftware.org/isinfo.php):
+`winget install JRSoftware.InnoSetup`. Debug builds keep a console window; release builds don't.
 
 | Module | Role |
 |---|---|
 | `quote` | `Symbol`, `Price`, `Quote`; the `QuoteSource` trait with `Yahoo`, `Asx` and `Fallback` |
 | `config` | `Config` (validated from the file's `RawConfig`) and `ConfigFile`, which reloads on edit |
 | `poller` | Background thread fetching from any `QuoteSource` on a market-hours schedule |
+| `update` | The `ReleaseFeed` trait with `GitHub`, the update thread, and the menu item's `State` |
 | `view` | `Feed` (loading / live / failed) and `View`: icon lines, colour, tooltip, menu header |
 | `icon` | Renders text rows onto the coloured square |
 | `main`, `menu`, `win` | The tray, its menu `Action`s, and Win32 helpers |
 
-Debug builds keep a console window; release builds don't.
+## Releases
+
+Commits follow [Conventional Commits](https://www.conventionalcommits.org): `feat:` bumps the
+minor version, `fix:` the patch. On every push to `main`, CI lints, tests and builds the
+installer, and [release-please](https://github.com/googleapis/release-please) keeps a release PR
+open with the next version and changelog. Merging that PR tags the release, and CI attaches the
+installer to it, which is what installed copies update to.
