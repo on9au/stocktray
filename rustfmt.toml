@@ -1,0 +1,3 @@
+# Keep short struct literals, calls and chains on one line.
+use_small_heuristics = "Max"
+max_width = 120
