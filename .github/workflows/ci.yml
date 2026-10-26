@@ -1,5 +1,6 @@
 # Every push and PR: lint, test and build the installer. On main, release-please keeps a release PR
-# open; merging it tags a release, and the installer built from that commit is attached to it.
+# open; merging it creates a draft release, which gets the installer built from that commit and is
+# then published.
 name: CI
 
 on:
@@ -24,7 +25,7 @@ jobs:
       - run: cargo test
       - run: choco install innosetup --no-progress -y
       - run: ./package.ps1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: installer
           path: dist/*.exe
@@ -41,7 +42,7 @@ jobs:
       tag: ${{ steps.release.outputs.tag_name }}
     steps:
       - id: release
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
 
   publish:
     needs: release-please
@@ -50,9 +51,14 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           name: installer
-      - run: gh release upload "${{ needs.release-please.outputs.tag }}" *.exe --repo "${{ github.repository }}"
+      # Attach before publishing: an immutable release can't take assets once it's out.
+      - run: |
+          gh release upload "$TAG" *.exe --repo "$REPO"
+          gh release edit "$TAG" --draft=false --latest --repo "$REPO"
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-please.outputs.tag }}
+          REPO: ${{ github.repository }}
